@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="script.pack.installer" version="1.0.0"
+	name="Add-On Pack Installer" provider-name="Josh.5">
+	<requires>
+		<import addon="xbmc.python" version="2.1.0"/>
+		<import addon="script.module.addon.common" optional="true" />
+	</requires>
+	<extension point="xbmc.python.pluginsource" library="default.py">
+		<provides>executable</provides>
+	</extension>
+	<extension point="xbmc.addon.metadata">
+		<summary>Add-On Pack Installer</summary>
+		<description>Easily download and install collections of pre-configured add-ons with this community based installer, based on the Hub Wizard </description>
+		<platform>all</platform>
+		<forum>http://tinyhtpc.co.nz/forum</forum>
+		<website>http://tinyhtpc.co.nz/</website>
+	</extension>
+</addon>

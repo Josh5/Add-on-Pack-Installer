@@ -1,0 +1,5 @@
+[B][COLOR=FF56ADDA]1.0.1 - 25FEB15[/COLOR][/B]
+• Add Pack Generator - Now give you the option to create your own Packs
+
+[B][COLOR=FF56ADDA]1.0.0 - 09FEB15[/COLOR][/B]
+• Initial Release ported from Hub wizard v1.1.8

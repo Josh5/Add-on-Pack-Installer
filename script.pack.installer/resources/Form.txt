@@ -1,0 +1,38 @@
+##
+# ===========================================================================
+#  1.1 Instructions:
+# ===========================================================================
+##
+#
+# 1) Upload your "Addon_Pack.zip" to a web server of your choice.
+# 2) Get the direct download link for your "Addon_Pack.zip". (IMPORTANT: MUST a direct download link)
+# 3) Fill in the "Add-On Pack Details" at the end of this form (Part 2.0)
+# 4) Upload your completed form to:
+#
+# Your pack should be included into the repository ASAP. Please be patient
+#
+##
+#
+# ===========================================================================
+#  1.2 Form Legend:
+# ===========================================================================
+##
+#
+# name="" <-- The name of your Add-On Pack that will appear in the Installer. Eg. "Josh.5 - My Add-Ons"
+# url="" <-- Direct Download URL where you uploaded your Addon_Pack.zip to.
+# img="" <-- URL to icon image displayed in Installer.
+# fanart="" <-- URL to background image displayed in Installer.
+# description="" <-- Brief description of the contents of your Add-On Pack. (Keep it short)
+#
+##
+#
+# ===========================================================================
+#  2.0 Add-On Pack Details:
+# ===========================================================================
+##
+
+name=""
+url=""
+img=""
+fanart=""
+description=""
