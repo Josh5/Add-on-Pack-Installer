@@ -1,3 +1,6 @@
+[B][COLOR=FF56ADDA]1.0.2 - TBA[/COLOR][/B]
+• Fix issue with pack generator failing due to 1970 timestamps on files/folders
+
 [B][COLOR=FF56ADDA]1.0.1 - 25FEB15[/COLOR][/B]
 • Add Pack Generator - Now give you the option to create your own Packs
 

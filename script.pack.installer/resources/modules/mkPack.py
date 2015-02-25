@@ -46,6 +46,8 @@ class PackGenerator:
         self.getSRC()
         # Change current working directory	
         os.chdir(self.BACKUP_DIR)
+        # Remove what is older than 1980
+        self.remOStamp('.')
         self.adzip()
         self.write_howto()
 
@@ -101,6 +103,20 @@ class PackGenerator:
     def create_dir(self, dirname):
         if not os.path.isdir(dirname):
             os.makedirs(dirname)
+
+    def remOStamp(self, path):
+        # Change stamp as zip wont allow older than 1980
+        for root, dirs, files in os.walk(path, topdown=False):
+            for name in files:
+                f = os.path.join(root, name)
+                old_time = os.stat(f).st_mtime #old access time
+                new_mtime = time.time() #new modification time
+                os.utime(f,(old_time,new_mtime)) #modify the file timestamp
+            for name in dirs:
+                f = os.path.join(root, name)
+                old_time = os.stat(f).st_mtime #old access time
+                new_mtime = time.time() #new modification time
+                os.utime(f,(old_time,new_mtime)) #modify the file timestamp
 
     def getSRC(self):
         # Select what to backup
