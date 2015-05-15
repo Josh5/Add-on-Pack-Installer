@@ -1,45 +1,5 @@
-import xbmcgui, urlparse
-
-def init_params():
-    param = {}
-    
-    if(len(sys.argv) > 1):
-        for i in sys.argv:
-            args = i
-            if(args.startswith('?')):
-                args = args[1:]
-            param.update(dict(urlparse.parse_qsl(args)))
-            
-    return param
-mode = -1
-todo = -1
-params = init_params()
-print params
-if("mode" in params):
-    if(params['mode'] == 'download'):
-        mode = 0
-    elif(params['mode'] == 'create'):
-        mode = 1
-    elif(params['mode'] != 'create') or (params['mode'] != 'download'):
-        todo = 3
-if (todo != 3):
-    mode = xbmcgui.Dialog().select("Add-On Pack Installer" + " - " + "Mode", ["Download Add-On Packs", "Create Your own Pack"])
-print mode
-print todo
-if(mode != -1):
-    if (mode == 0):
-        print 'Installer'
-    elif (mode == 1):
-        print 'Creator'
-        import resources.modules.mkPack as mkpack
-        packgenerator = mkpack.PackGenerator()
-        packgenerator.do_generator()
-        quit()
-    else:
-        quit()
-
 ##Run Add-On Pack Installer
-import urllib,urllib2,re,xbmcplugin,xbmcgui,xbmc,xbmcaddon,os,sys,downloader,extract,time,shutil
+import urllib,urllib2,re,xbmcplugin,xbmcgui,xbmc,xbmcaddon,os,sys,downloader,extract,time,shutil,subprocess
 from resources.modules import main
 addon_id='script.pack.installer'; AddonTitle='Config Wizard'; 
 wizardUrl='https://raw.githubusercontent.com/Josh5/addon-packs/master/'; #wizardUrl='http://tribeca.xbmchub.com/tools/wizard/'
@@ -59,13 +19,13 @@ def HELPCATEGORIES():
     if ((XBMCversion['Ver'] in ['','']) or (int(XBMCversion['two']) < 12)) and (settings.getSetting('bypass-xbmcversion')=='false'):
         eod(); addon.show_ok_dialog(["Compatibility Issue: Outdated Kodi Setup","Please upgrade to a newer version of XBMC first!","Visit %s for Support!"%SiteDomain],title="XBMC "+XBMCversion['Ver'],is_error=False); DoA('Back'); 
     else:
-        link=OPEN_URL(wizardUrl+'links.txt').replace('\n','').replace('\r','')
-        match=re.compile('name="(.+?)".+?rl="(.+?)".+?mg="(.+?)".+?anart="(.+?)".+?escription="(.+?)".+?ype="(.+?)".+?nset="(.+?)"').findall(link)
-        for name,url,iconimage,fanart,description,filetype,skinset in match:
+        link=OPEN_URL(wizardUrl+'packs.txt').replace('\n','').replace('\r','')
+        match=re.compile('name="(.+?)".+?rl="(.+?)".+?mg="(.+?)".+?anart="(.+?)".+?escription="(.+?)".+?ype="(.+?)".+?nset="(.+?)".+?estart="(.+?)"').findall(link)
+        for name,url,iconimage,fanart,description,filetype,skinset,restart in match:
             #if 'status' in filetype:
                 #main.addHELPDir(name,url,'wizardstatus',iconimage,fanart,description,filetype)
             #else:    
-                main.addHELPDir(name,url,'helpwizard',iconimage,fanart,description,filetype,skinset)
+                main.addHELPDir(name,url,'helpwizard',iconimage,fanart,description,filetype,skinset,restart)
                 #print [name,url]
         main.AUTO_VIEW('movies')
         #main.addHELPDir('Testing','http://www.firedrive.com/file/################','helpwizard',iconimage,fanart,description,filetype) ## For Testing to test a url with a FileHost.
@@ -99,7 +59,7 @@ def FireDrive(url):
         	return urllib.unquote_plus(r.group(1))
         else: return url+'#[error]'
     except: return url+'#[error]'
-def HELPWIZARD(name,url,description,filetype,skinset):
+def HELPWIZARD(name,url,description,filetype,skinset,restart):
     path=xbmc.translatePath(os.path.join('special://home','addons','packages'))
     confirm=xbmcgui.Dialog()
     if confirm.yesno(TeamName,"Would you like the '%s' Add-on Pack"%name,"to customize your Kodi (XBMC) installation? "," "):
@@ -107,21 +67,16 @@ def HELPWIZARD(name,url,description,filetype,skinset):
         lib=os.path.join(path,name+'.zip')
         try: os.remove(lib)
         except: pass
-        ### ## File Host Handling ## \/
         url=FireDrive(url)
-        #url=SockShare(url)
         if '[error]' in url: print url; dialog=xbmcgui.Dialog(); dialog.ok("Error!",url); return
         else: print url
-        ### ## File Host Handling ## /\
         downloader.download(url,lib,dp)
-        #return ## For Testing 2 Black Overwrite of stuff. ##
-    #if filetype == 'addon':
-        #addonfolder = xbmc.translatePath(os.path.join('special://','home/addons'))
-    #elif filetype == 'media':
-        #addonfolder = xbmc.translatePath(os.path.join('special://','home'))    
-#attempt Shortcuts
-    #elif filetype == 'main':
-        addonfolder=xbmc.translatePath(os.path.join('special://','home'))
+        if filetype == 'home':
+            addonfolder=xbmc.translatePath(os.path.expanduser('~/'))
+        elif filetype == 'main':
+            addonfolder=xbmc.translatePath(os.path.join('special://','home'))
+        else:
+            addonfolder=xbmc.translatePath(os.path.join('special://','home'))
         time.sleep(2)
         dp.update(0,"","Extracting Zip Please Wait")
         print '======================================='; print addonfolder; print '======================================='
@@ -134,7 +89,6 @@ def HELPWIZARD(name,url,description,filetype,skinset):
             for shortname in shorts: xbmc.executebuiltin("Skin.SetString(%s)" % shortname)
             bools=re.compile('setbool="(.+?)"').findall(link)
             for shortname in bools: xbmc.executebuiltin("Skin.SetBool(%s)" % shortname)
-        #link=OPEN_URL(wizardUrl+'shortcuts.txt')
         proname=xbmc.getInfoLabel("System.ProfileName")
         #shorts=re.compile('shortcut="(.+?)"').findall(link)
         #for shortname in shorts: xbmc.executebuiltin("Skin.SetString(%s)" % shortname)
@@ -149,15 +103,14 @@ def HELPWIZARD(name,url,description,filetype,skinset):
         #xbmc.executebuiltin('Skin.SetString(CustomBackgroundPath,%s)' % (os.path.join('special://','home','media','SKINDEFAULT.jpg')))
         #xbmc.executebuiltin('Skin.SetBool(UseCustomBackground)')
         time.sleep(2)
-        print '======================================='; print 'Unloading Skin'; print '======================================='
-        xbmc.executebuiltin('UnloadSkin()') 
-        print '======================================='; print 'Reloading Skin'; print '======================================='
-        xbmc.executebuiltin('ReloadSkin()') 
-        dp=xbmcgui.DialogProgress(); dp.create(AddonTitle,"Reloading add-ons ",'','Please Wait')
-        time.sleep(7) 
-        print '======================================='; print 'Loading Profile'; print '======================================='
-        xbmc.executebuiltin("LoadProfile(%s)" % proname)
-        dialog=xbmcgui.Dialog(); dialog.ok("Success!","Installation Complete","[COLOR gold]Brought To You By %s[/COLOR]"%SiteDomain)
+        if restart == 'yes':
+            print '======================================='; print 'Restarting Kodi...'; print '======================================='
+            dialog=xbmcgui.Dialog(); dialog.ok("Success!","Click OK to restart your device","[B]Brought To You By %s[/B]"%SiteDomain)
+            subprocess.Popen('pkill -9 kodi && reboot', shell=True, close_fds=True)
+        xbmc.executebuiltin( 'UpdateAddonRepos' )            
+        xbmc.executebuiltin( 'UpdateLocalAddons' )
+        dialog=xbmcgui.Dialog(); dialog.ok("Success!","Installation Complete","[B]Brought To You By %s[/B]"%SiteDomain)      
+        #xbmc.executebuiltin( "ReplaceWindow(home)" )
         ##
 def WIZARDSTATUS(url):
     link=OPEN_URL(url).replace('\n','').replace('\r','')
@@ -210,7 +163,7 @@ def get_params():
                         splitparams={}; splitparams=pairsofparams[i].split('=')
                         if (len(splitparams))==2: param[splitparams[0]]=splitparams[1]
         return param
-params=get_params(); url=None; name=None; mode=None; year=None; imdb_id=None; skinset=None
+params=get_params(); url=None; name=None; mode=None; year=None; imdb_id=None; skinset=None; restart=None
 try:    fanart=urllib.unquote_plus(params["fanart"])
 except: pass
 try:    description=urllib.unquote_plus(params["description"])
@@ -227,8 +180,10 @@ try:		year=urllib.unquote_plus(params["year"])
 except: pass
 try:		skinset=urllib.unquote_plus(params["skinset"])
 except: pass
-print "Mode: "+str(mode); print "URL: "+str(url); print "Name: "+str(name); print "Year: "+str(year)
+try:		restart=urllib.unquote_plus(params["restart"])
+except: pass
+print "Mode: "+str(mode); print "URL: "+str(url); print "Name: "+str(name); print "Year: "+str(year); print "restart: "+str(restart)
 if mode==None or url==None or len(url)<1: HELPCATEGORIES()
 elif mode=="wizardstatus": print""+url; items = WIZARDSTATUS(url)
-elif mode=='helpwizard': HELPWIZARD(name,url,description,filetype,skinset)
+elif mode=='helpwizard': HELPWIZARD(name,url,description,filetype,skinset,restart)
 xbmcplugin.endOfDirectory(int(sys.argv[1]))        

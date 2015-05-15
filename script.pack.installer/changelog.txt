@@ -1,4 +1,11 @@
-[B][COLOR=FF56ADDA]1.0.2 - TBA[/COLOR][/B]
+[B][COLOR=FF56ADDA]1.1.1 - 13May15[/COLOR][/B]
+• Reboot device instead of kodi to prevent remote server crashing
+
+[B][COLOR=FF56ADDA]1.1.0 - 10May15[/COLOR][/B]
+• Allow full config of EmbER system for packs
+• Disable pack generator. (May be created into a seperate addon or something at a later date)
+
+[B][COLOR=FF56ADDA]1.0.2 - 25Feb15[/COLOR][/B]
 • Fix issue with pack generator failing due to 1970 timestamps on files/folders
 
 [B][COLOR=FF56ADDA]1.0.1 - 25FEB15[/COLOR][/B]

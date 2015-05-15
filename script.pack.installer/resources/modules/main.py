@@ -14,7 +14,7 @@ addon_id='script.pack.installer';
 # Global Stuff
 addon=Addon(addon_id,sys.argv); net=Net(); settings=xbmcaddon.Addon(id=addon_id)
 # HELPDIR
-def addHELPDir(name,url,mode,iconimage,fanart,description,filetype,skinset): u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&fanart="+urllib.quote_plus(fanart)+"&description="+urllib.quote_plus(description)+"&filetype="+urllib.quote_plus(filetype)+"&skinset="+urllib.quote_plus(skinset); ok=True; liz=xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=iconimage); liz.setInfo(type="Video",infoLabels={"title":name,"Plot":description}); liz.setProperty("Fanart_Image",fanart); ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=False); return ok
+def addHELPDir(name,url,mode,iconimage,fanart,description,filetype,skinset,restart): u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&iconimage="+urllib.quote_plus(iconimage)+"&fanart="+urllib.quote_plus(fanart)+"&description="+urllib.quote_plus(description)+"&filetype="+urllib.quote_plus(filetype)+"&skinset="+urllib.quote_plus(skinset)+"&restart="+urllib.quote_plus(restart); ok=True; liz=xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=iconimage); liz.setInfo(type="Video",infoLabels={"title":name,"Plot":description}); liz.setProperty("Fanart_Image",fanart); ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=False); return ok
 # Standard addDir
 def addDir(name,url,mode,thumb,labels,favtype):
 	contextMenuItems=[]; sitethumb=thumb; sitename=name
