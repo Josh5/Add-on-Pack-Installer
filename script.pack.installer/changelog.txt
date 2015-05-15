@@ -1,3 +1,7 @@
+[B][COLOR=FF56ADDA]1.1.2 - 15May15[/COLOR][/B]
+• Add ability to individually edit specific guisettings in EmbER
+• Employ EmbER's System Settings to restart Kodi (if addon is run on an EmbER system)
+
 [B][COLOR=FF56ADDA]1.1.1 - 13May15[/COLOR][/B]
 • Reboot device instead of kodi to prevent remote server crashing
 

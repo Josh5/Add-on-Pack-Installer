@@ -1,7 +1,7 @@
 ##Run Add-On Pack Installer
 import urllib,urllib2,re,xbmcplugin,xbmcgui,xbmc,xbmcaddon,os,sys,downloader,extract,time,shutil,subprocess
 from resources.modules import main
-addon_id='script.pack.installer'; AddonTitle='Config Wizard'; 
+addon_id='script.pack.installer'; AddonTitle='Add-on Pack Installer'; 
 wizardUrl='https://raw.githubusercontent.com/Josh5/addon-packs/master/'; #wizardUrl='http://tribeca.xbmchub.com/tools/wizard/'
 SiteDomain='TinyHTPC.co.nz'; #SiteDomain='XBMCHUB.com'
 TeamName='Add-on Pack Installer'; #TeamName='Team XBMCHUB'
@@ -46,24 +46,42 @@ def FireDrive(url):
         if ">This file doesn't exist, or has been removed.<" in html: return "[error]  This file doesn't exist, or has been removed."
         elif ">File Does Not Exist | Firedrive<" in html: return "[error]  File Does Not Exist."
         elif "404: This file might have been moved, replaced or deleted.<" in html: return "[error]  404: This file might have been moved, replaced or deleted."
-        #print html; 
         data={}; r=re.findall(r'<input\s+type="\D+"\s+name="(.+?)"\s+value="(.+?)"\s*/>',html);
         for name,value in r: data[name]=value
-        #print data; 
         if len(data)==0: return '[error]  input data not found.'
         html=net.http_POST(url,data,headers={'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:30.0) Gecko/20100101 Firefox/30.0','Referer': url,'Host': 'www.firedrive.com'}).content
-        #print html
         r=re.search('<a\s+href="(.+?)"\s+target="_blank"\s+id=\'top_external_download\'\s+title=\'Download This File\'\s*>',html)
         if r: 
         	print urllib.unquote_plus(r.group(1)); 
         	return urllib.unquote_plus(r.group(1))
         else: return url+'#[error]'
     except: return url+'#[error]'
+
+def isember():
+    if os.path.isfile('/etc/os-release'):
+        osrelease = open('/etc/os-release')
+        file = osrelease.readlines()
+        OSID = False
+        for line in file:
+            if 'ID=' in line and not '_ID' in line:
+                OSID = line[line.find('=')+1 : line.find('\n')].rstrip('\n')
+                if OSID in ['ember']:
+                    return True
+            else:
+                pass
+        if OSID in ['ember']:
+            return True
+        else:
+            return False
+        osrelease.close()
+    else:
+        return False
+
 def HELPWIZARD(name,url,description,filetype,skinset,restart):
     path=xbmc.translatePath(os.path.join('special://home','addons','packages'))
     confirm=xbmcgui.Dialog()
     if confirm.yesno(TeamName,"Would you like the '%s' Add-on Pack"%name,"to customize your Kodi (XBMC) installation? "," "):
-        dp=xbmcgui.DialogProgress(); dp.create(AddonTitle,"Downloading ",'','Please Wait')
+        dp=xbmcgui.DialogProgress(); dp.create(AddonTitle,"Downloading",'','Please Wait')
         lib=os.path.join(path,name+'.zip')
         try: os.remove(lib)
         except: pass
@@ -78,44 +96,50 @@ def HELPWIZARD(name,url,description,filetype,skinset,restart):
         else:
             addonfolder=xbmc.translatePath(os.path.join('special://','home'))
         time.sleep(2)
-        dp.update(0,"","Extracting Zip Please Wait")
+        dp.update(0,"Extracting Zip",'','Please Wait')
         print '======================================='; print addonfolder; print '======================================='
         extract.all(lib,addonfolder,dp)
-        #=== Edit XBMC Settings ===
+        # === Edit XBMC Settings ===
+        isthisember = isember()
         if skinset != 'none':
-            print "Write settings: "+skinset
+            from resources.modules import changeguisettings
+            print "Write guisettings: "+skinset
             link=OPEN_URL(skinset)
             shorts=re.compile('shortcut="(.+?)"').findall(link)
             for shortname in shorts: xbmc.executebuiltin("Skin.SetString(%s)" % shortname)
             bools=re.compile('setbool="(.+?)"').findall(link)
-            for shortname in bools: xbmc.executebuiltin("Skin.SetBool(%s)" % shortname)
-        proname=xbmc.getInfoLabel("System.ProfileName")
-        #shorts=re.compile('shortcut="(.+?)"').findall(link)
-        #for shortname in shorts: xbmc.executebuiltin("Skin.SetString(%s)" % shortname)
-        ##xbmc.executebuiltin('Skin.SetString(CustomBackgroundPath,%s)' %img)
-        ##xbmc.executebuiltin('Skin.SetBool(ShowBackgroundVideo)')       ## Set to true so we can later set them to false.
-        ##xbmc.executebuiltin('Skin.SetBool(ShowBackgroundVis)')         ## Set to true so we can later set them to false.
-        #xbmc.executebuiltin('Skin.SetBool(HideBackGroundFanart)')      ## Set to true.
-        #xbmc.executebuiltin('Skin.SetBool(HideVisualizationFanart)')   ## Set to true.
-        #xbmc.executebuiltin('Skin.SetBool(AutoScroll)')                ## Set to true.
-        ##xbmc.executebuiltin('Skin.ToggleSetting(ShowBackgroundVideo)') ## Switching from true to false.
-        ##xbmc.executebuiltin('Skin.ToggleSetting(ShowBackgroundVis)')   ## Switching from true to false.
-        #xbmc.executebuiltin('Skin.SetString(CustomBackgroundPath,%s)' % (os.path.join('special://','home','media','SKINDEFAULT.jpg')))
-        #xbmc.executebuiltin('Skin.SetBool(UseCustomBackground)')
+            for boolname in bools: xbmc.executebuiltin("Skin.SetBool(%s)" % boolname)
+            elements=re.compile('setelement="(.+?)"').findall(link)
+            isthisember = isember()
+            for elementname in elements:
+                settings = elementname.split(',')
+                print settings
+                if isthisember:
+                    if changeguisettings.write_to_chfile(settings[0], settings[1], settings[2]):
+                        print "Prepairing to write guisetting: "+settings[0]+' > '+settings[1]+' > '+settings[2]
+                else:
+                    if changeguisettings.set_setting(settings[0], settings[1], settings[2]):
+                        print "Writing guisetting: "+settings[0]+' > '+settings[1]+' > '+settings[2]
         time.sleep(2)
+        # === Reset Kodi to take on applied changes ===
         if restart == 'yes':
             print '======================================='; print 'Restarting Kodi...'; print '======================================='
-            dialog=xbmcgui.Dialog(); dialog.ok("Success!","Click OK to restart your device","[B]Brought To You By %s[/B]"%SiteDomain)
-            subprocess.Popen('pkill -9 kodi && reboot', shell=True, close_fds=True)
+            dialog=xbmcgui.Dialog(); dialog.ok("Success!","Click OK to restart your device","","[B]Brought To You By %s[/B]"%SiteDomain)
+            if isthisember:
+                changeguisettings.reload_kodi()
+            else:
+                subprocess.Popen('pkill -9 kodi && reboot', shell=True, close_fds=True)
         xbmc.executebuiltin( 'UpdateAddonRepos' )            
         xbmc.executebuiltin( 'UpdateLocalAddons' )
-        dialog=xbmcgui.Dialog(); dialog.ok("Success!","Installation Complete","[B]Brought To You By %s[/B]"%SiteDomain)      
+        dialog=xbmcgui.Dialog(); dialog.ok("Success!","Installation Complete","","[B]Brought To You By %s[/B]"%SiteDomain)      
         #xbmc.executebuiltin( "ReplaceWindow(home)" )
         ##
+
 def WIZARDSTATUS(url):
     link=OPEN_URL(url).replace('\n','').replace('\r','')
     match=re.compile('name="(.+?)".+?rl="(.+?)".+?mg="(.+?)".+?anart="(.+?)".+?escription="(.+?)".+?ype="(.+?)"').findall(link)
     for name,url,iconimage,fanart,description,filetype in match: header="[B][COLOR gold]"+name+"[/B][/COLOR]"; msg=(description); TextBoxes(header,msg)
+
 def TextBoxes(heading,anounce):
         class TextBox():
             WINDOW=10147; CONTROL_LABEL=1; CONTROL_TEXTBOX=5
